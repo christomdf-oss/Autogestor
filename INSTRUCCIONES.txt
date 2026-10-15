@@ -1,0 +1,20 @@
+AUTOGESTOR + DOCKER
+
+1. Instala Docker Desktop y comprueba: docker --version y docker compose version
+2. Copia Dockerfile, docker-compose.yml y .dockerignore a la raíz de Backend.
+3. Copia .env.docker.example a Backend/.env.docker y cambia POSTGRES_PASSWORD y SECRET_KEY.
+4. Añade .env.docker a tu .gitignore (sin borrar el resto).
+5. Desde Backend, ejecuta:
+   docker compose --env-file .env.docker up --build -d
+6. Comprueba:
+   docker compose --env-file .env.docker ps
+   docker compose --env-file .env.docker logs -f web
+7. Abre http://127.0.0.1:8000/docs
+
+IMPORTANTE:
+- Apaga el uvicorn local antes de iniciar Docker (Ctrl+C): ambos usan puerto 8000.
+- PostgreSQL de Docker es NUEVO e independiente de tu PostgreSQL de Windows.
+- No ejecutes 'docker compose down -v' si quieres conservar datos/fotos del contenedor.
+- Los usuarios anteriores no aparecen automáticamente en la base nueva.
+- Si no hay admin inicial, se requiere un proceso controlado de creación de primer admin.
+- Para detener sin borrar datos: docker compose --env-file .env.docker down

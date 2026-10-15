@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+
+
+<head>
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta
+
+        name="viewport"
+
+        content="width=device-width, initial-scale=1.0"
+
+    >
+
+
+
+    <title>AutoGestor | Gestión Automotriz</title>
+
+
+
+    <link
+
+        rel="icon"
+
+        type="image/png"
+
+        href="/static/images/favicon.png"
+
+    >
+
+
+
+    <link
+
+        rel="stylesheet"
+
+        href="/static/css/style.css"
+
+    >
+
+
+
+</head>
+
+
+
+
+
+<body>
+
+
+
+
+
+<!-- =========================
+
+     LOGIN
+
+\========================= -->
+
+
+
+<div id="loginModal" class="login-overlay">
+
+
+
+    <div class="login-card">
+
+
+
+        <div class="login-brand">
+
+
+
+            <img
+
+                src="/static/images/logo-autogestor.png"
+
+                alt="AutoGestor"
+
+                class="login-brand-logo"
+
+            >
+
+
+
+        </div>
+
+
+
+        <p class="login-label">
+
+            SISTEMA DE GESTIÓN AUTOMOTRIZ
+
+        </p>
+
+
+
+        <h1>Bienvenido</h1>
+
+
+
+        <p class="login-description">
+
+            Inicia sesión para acceder al panel de control.
+
+        </p>
+
+
+
+
+
+        <form id="loginForm">
+
+
+
+            <label>
+
+                Correo electrónico
+
+            </label>
+
+
+
+            <input
+
+                id="loginEmail"
+
+                type="email"
+
+                placeholder="correo\@ejemplo.com"
+
+                required
+
+            >
+
+
+
+
+
+            <label>
+
+                Contraseña
+
+            </label>
+
+
+
+            <input
+
+                id="loginPassword"
+
+                type="password"
+
+                placeholder="••••••••"
+
+                required
+
+            >
+
+
+
+
+
+            <p
+
+                id="loginError"
+
+                class="login-error"
+
+            ></p>
+
+
+
+
+
+            <button
+
+                type="submit"
+
+                class="login-button"
+
+            >
+
+                Iniciar sesión
+
+            </button>
+
+
+
+        </form>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- =========================
+
+     APLICACIÓN
+
+\========================= -->
+
+
+
+<div class="app">
+
+
+
+
+
+    <!-- SIDEBAR -->
+
+
+
+    <aside class="sidebar">
+
+
+
+
+
+        <div class="logo">
+
+
+
+            <img
+
+                src="/static/images/icono-autogestor.png"
+
+                alt="AutoGestor"
+
+                class="sidebar-logo"
+
+            >
+
+
+
+            <div>
+
+
+
+                <h2>
+
+                    AUTO<span>GESTOR</span>
+
+                </h2>
+
+
+
+                <p>
+
+                    Automotive Management
+
+                </p>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <nav>
+
+
+
+            <a
+
+                href="#"
+
+                class="nav-item active"
+
+                data-section="dashboard"
+
+            >
+
+                <span>⌂</span>
+
+                Dashboard
+
+            </a>
+
+
+
+
+
+            <a
+
+                href="#"
+
+                class="nav-item"
+
+                data-section="vehiculos"
+
+            >
+
+                <span>◆</span>
+
+                Vehículos
+
+            </a>
+
+
+
+
+
+            <a
+
+                href="#"
+
+                class="nav-item"
+
+                data-section="agregar" data-admin="true"
+
+            >
+
+                <span>＋</span>
+
+                Agregar vehículo
+
+            </a>
+
+
+
+
+
+            <a
+
+                href="#"
+
+                class="nav-item"
+
+                data-section="buscar"
+
+            >
+
+                <span>⌕</span>
+
+                Buscar
+
+            </a>
+
+
+
+
+
+            <p class="nav-title">
+
+                ADMINISTRACIÓN
+
+            </p>
+
+
+
+
+
+            <a
+
+                href="#"
+
+                class="nav-item"
+
+                data-section="usuarios" data-admin="true"
+
+            >
+
+                <span>♙</span>
+
+                Usuarios
+
+            </a>
+
+
+
+
+
+            <a
+
+                href="/docs"
+
+                target="_blank"
+
+                class="nav-item"
+
+            >
+
+                <span>⚙</span>
+
+                API
+
+            </a>
+
+
+
+        </nav>
+
+
+
+
+
+
+
+        <div class="sidebar-user">
+
+
+
+            <img
+
+                src="/static/images/icono-autogestor.png"
+
+                alt="Usuario"
+
+                class="user-avatar"
+
+            >
+
+
+
+            <div>
+
+
+
+                <strong id="sidebarUserName">
+
+                    Usuario
+
+                </strong>
+
+
+
+                <p id="sidebarUserRole">
+
+                    AutoGestor
+
+                </p>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </aside>
+
+
+
+
+
+
+
+    <!-- CONTENIDO PRINCIPAL -->
+
+
+
+    <main class="main">
+
+
+
+
+
+        <!-- TOPBAR -->
+
+
+
+        <header class="topbar">
+
+
+
+            <div>
+
+
+
+                <p class="small-text">
+
+                    PANEL DE CONTROL
+
+                </p>
+
+
+
+                <h1>
+
+                    Bienvenido a
+
+                    <span>AutoGestor</span>
+
+                </h1>
+
+
+
+            </div>
+
+
+
+
+
+            <div class="top-actions">
+
+
+
+                <div class="status">
+
+
+
+                    <span></span>
+
+
+
+                    Sistema activo
+
+
+
+                </div>
+
+
+
+
+
+                <button
+
+                    id="logoutButton"
+
+                    class="profile-button"
+
+                    title="Cerrar sesión"
+
+                >
+
+                    AG
+
+                </button>
+
+
+
+            </div>
+
+
+
+        </header>
+
+
+
+
+
+
+
+        <div id="section-dashboard" class="page-section">
+
+        <!-- HERO -->
+
+
+
+        <section class="hero">
+
+
+
+            <div class="hero-content">
+
+
+
+                <p class="hero-label">
+
+                    AUTOGESTOR
+
+                </p>
+
+
+
+                <h2>
+
+                    Control total de tu
+
+                    <span>inventario.</span>
+
+                </h2>
+
+
+
+                <p class="hero-description">
+
+
+
+                    Gestiona vehículos,
+
+                    usuarios y operaciones
+
+                    desde una sola plataforma.
+
+
+
+                </p>
+
+
+
+
+
+                <div class="hero-buttons">
+
+
+
+                    <button
+
+                        id="verVehiculosButton"
+
+                        class="primary-button"
+
+                    >
+
+                        Ver vehículos
+
+                    </button>
+
+
+
+
+
+                    <button
+
+                        id="agregarVehiculoButton" data-admin="true"
+
+                        class="secondary-button"
+
+                    >
+
+                        + Agregar vehículo
+
+                    </button>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <div class="car-area">
+
+
+
+                <div class="blue-glow"></div>
+
+
+
+                <div class="hero-brand">
+
+
+
+                    <img
+
+                        src="/static/images/icono-autogestor.png"
+
+                        alt="AutoGestor"
+
+                        class="hero-logo"
+
+                    >
+
+
+
+                    <p>
+
+                        GESTIONA · VENDE · CRECE
+
+                    </p>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+        </section>
+
+
+
+
+
+
+
+        <!-- ESTADÍSTICAS -->
+
+
+
+        <section class="stats">
+
+
+
+
+
+            <article class="stat-card">
+
+
+
+                <div class="stat-icon">
+
+                    ◆
+
+                </div>
+
+
+
+                <div>
+
+
+
+                    <p>
+
+                        Vehículos
+
+                    </p>
+
+
+
+                    <h3 id="totalVehiculos">
+
+                        --
+
+                    </h3>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+
+
+
+
+            <article class="stat-card">
+
+
+
+                <div class="stat-icon">
+
+                    $
+
+                </div>
+
+
+
+                <div>
+
+
+
+                    <p>
+
+                        Valor del inventario
+
+                    </p>
+
+
+
+                    <h3 id="valorInventario">
+
+                        --
+
+                    </h3>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+
+
+
+
+            <article class="stat-card">
+
+
+
+                <div class="stat-icon">
+
+                    ↗
+
+                </div>
+
+
+
+                <div>
+
+
+
+                    <p>
+
+                        Precio promedio
+
+                    </p>
+
+
+
+                    <h3 id="precioPromedio">
+
+                        --
+
+                    </h3>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+
+
+
+
+            <article class="stat-card">
+
+
+
+                <div class="stat-icon">
+
+                    ◉
+
+                </div>
+
+
+
+                <div>
+
+
+
+                    <p>
+
+                        Marcas
+
+                    </p>
+
+
+
+                    <h3 id="totalMarcas">
+
+                        --
+
+                    </h3>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+        </section>
+
+
+
+
+
+
+
+        <!-- DASHBOARD -->
+
+
+
+        <section class="dashboard-grid">
+
+
+
+
+
+            <!-- INVENTARIO -->
+
+
+
+            <article class="panel inventory-panel">
+
+
+
+                <div class="panel-header">
+
+
+
+                    <div>
+
+
+
+                        <p class="small-text">
+
+                            INVENTARIO
+
+                        </p>
+
+
+
+                        <h3>
+
+                            Vehículos recientes
+
+                        </h3>
+
+
+
+                    </div>
+
+
+
+
+
+                    <button
+
+                        id="verTodosButton"
+
+                        class="small-button"
+
+                    >
+
+                        Ver todos
+
+                    </button>
+
+
+
+                </div>
+
+
+
+
+
+
+
+                <div
+
+                    id="vehiculosLista"
+
+                    class="vehicle-list"
+
+                >
+
+
+
+                    <div class="loading">
+
+
+
+                        Inicia sesión para
+
+                        consultar el inventario.
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </article>
+
+
+
+
+
+
+
+            <!-- GRÁFICA -->
+
+
+
+            <article class="panel chart-panel">
+
+
+
+                <div class="panel-header">
+
+
+
+                    <div>
+
+
+
+                        <p class="small-text">
+
+                            DISTRIBUCIÓN
+
+                        </p>
+
+
+
+                        <h3>
+
+                            Vehículos por marca
+
+                        </h3>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+
+
+                <div
+
+                    id="brandChart"
+
+                    class="brand-chart"
+
+                >
+
+
+
+                    <div class="chart-circle">
+
+
+
+                        <div>
+
+
+
+                            <strong id="chartTotal">
+
+                                0
+
+                            </strong>
+
+
+
+                            <span>
+
+                                vehículos
+
+                            </span>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+
+
+                <div
+
+                    id="brandLegend"
+
+                    class="legend"
+
+                >
+
+                    Sin información
+
+                </div>
+
+
+
+            </article>
+
+
+
+        </section>
+
+
+
+
+
+
+
+        </div>
+
+        
+<!-- INVENTARIO -->
+<section id="section-vehiculos" class="page-section hidden">
+  <div class="section-head"><div><p class="small-text">INVENTARIO</p><h2>Vehículos registrados</h2><p>Consulta las fotografías y administra el inventario.</p></div><button class="primary-button admin-only" id="nuevoDesdeInventario">+ Agregar vehículo</button></div>
+  <div id="inventoryMessage" class="notice hidden"></div>
+  <div id="inventoryGrid" class="vehicle-grid"></div>
+</section>
+
+<!-- FORMULARIO -->
+<section id="section-agregar" class="page-section hidden admin-only">
+  <div class="section-head"><div><p class="small-text">ADMINISTRACIÓN</p><h2 id="vehicleFormTitle">Agregar vehículo</h2><p>Registra o modifica los datos del automóvil.</p></div></div>
+  <form id="vehicleForm" class="panel vehicle-form">
+    <div class="form-grid">
+      <label>Marca<input name="marca" required maxlength="50" placeholder="Toyota"></label>
+      <label>Modelo<input name="modelo" required maxlength="50" placeholder="RAV4"></label>
+      <label>Año<input name="año" type="number" min="1901" max="2100" required></label>
+      <label>Precio (MXN)<input name="precio" type="number" min="0.01" step="0.01" required></label>
+      <label>Kilometraje<input name="kilometraje" type="number" min="0" value="0" required></label>
+      <label>Color<input name="color" maxlength="50" value="No especificado" required></label>
+      <label>Estado<select name="estado"><option value="disponible">Disponible</option><option value="apartado">Apartado</option><option value="vendido">Vendido</option></select></label>
+      <label class="wide">Descripción<textarea name="descripcion" rows="3" maxlength="2000" placeholder="Condiciones, equipamiento, observaciones..."></textarea></label>
+      <label class="wide">Fotografías (máximo 10, JPG/PNG/WebP, 5 MB cada una)<input id="vehicleImages" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
+    </div>
+    <div id="existingImages" class="photo-grid"></div>
+    <p id="vehicleFormMessage" class="form-message" role="status"></p>
+    <div class="form-actions"><button type="button" class="secondary-button" id="cancelVehicleForm">Cancelar</button><button type="submit" class="primary-button" id="saveVehicleButton">Guardar vehículo</button></div>
+  </form>
+</section>
+
+<!-- BUSCADOR -->
+<section id="section-buscar" class="page-section hidden">
+  <div class="section-head"><div><p class="small-text">CATÁLOGO</p><h2>Buscar vehículos</h2><p>Filtra el inventario por marca, modelo, precio y estado.</p></div></div>
+  <form id="searchForm" class="panel search-form">
+    <label>Marca<input name="marca" placeholder="Ej. Toyota"></label>
+    <label>Modelo<input name="modelo" placeholder="Ej. RAV4"></label>
+    <label>Precio mínimo<input name="precio_min" type="number" min="0" placeholder="0"></label>
+    <label>Precio máximo<input name="precio_max" type="number" min="0" placeholder="Sin límite"></label>
+    <label>Estado<select name="estado"><option value="">Todos</option><option value="disponible">Disponible</option><option value="apartado">Apartado</option><option value="vendido">Vendido</option></select></label>
+    <button class="primary-button" type="submit">Buscar</button><button class="secondary-button" id="clearSearch" type="button">Limpiar</button>
+  </form>
+  <p id="searchCount" class="results-count"></p>
+  <div id="searchResults" class="vehicle-grid"></div>
+</section>
+
+<!-- USUARIOS -->
+<section id="section-usuarios" class="page-section hidden admin-only">
+  <div class="section-head"><div><p class="small-text">ADMINISTRACIÓN</p><h2>Usuarios</h2><p>Crea empleados y administra sus permisos de acceso.</p></div></div>
+  <form id="userForm" class="panel user-form">
+    <h3>Registrar empleado</h3>
+    <div class="user-form-grid">
+      <label>Nombre<input name="nombre" type="text" minlength="1" maxlength="50" required placeholder="Nombre completo"></label>
+      <label>Correo electrónico<input name="email" type="email" required placeholder="empleado@empresa.com"></label>
+      <label>Contraseña inicial<input name="contraseña" type="password" minlength="8" maxlength="100" required autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label>
+      <label>Rol<select name="rol" required><option value="usuario">Usuario (consulta)</option><option value="admin">Administrador</option></select></label>
+    </div>
+    <button id="saveUserButton" type="submit" class="primary-button">Crear usuario</button>
+    <p id="userFormMessage" class="notice" role="status"></p>
+  </form>
+  <div id="usersMessage" class="notice"></div>
+  <div id="usersList" class="panel users-list"></div>
+</section>
+
+<!-- DETALLE -->
+<div id="detailModal" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-label="Detalle del vehículo">
+  <div class="detail-card"><button type="button" id="closeDetail" class="close-detail" aria-label="Cerrar">×</button><div id="detailContent"></div></div>
+</div>
+<div id="toast" class="toast hidden" role="status"></div>
+
+        <!-- PIE -->
+
+
+
+        <footer class="app-footer">
+
+
+
+            <img
+
+                src="/static/images/favicon.png"
+
+                alt="AutoGestor"
+
+            >
+
+
+
+            <span>
+
+                AutoGestor · Gestiona · Vende · Crece
+
+            </span>
+
+
+
+        </footer>
+
+
+
+
+
+    </main>
+
+
+
+</div>
+
+
+
+
+
+<script src="/static/js/app.js"></script>
+
+
+
+</body>
+
+
+
+</html>

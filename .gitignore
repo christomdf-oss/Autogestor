@@ -1,0 +1,35 @@
+
+# Variables de entorno y contraseñas
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Entornos virtuales de Python
+venv/
+.venv/
+env/
+
+# Archivos temporales de Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Respaldos de PostgreSQL
+backups/
+*.dump
+*.backup
+*.sql
+
+# Fotografías cargadas por usuarios
+static/uploads/
+
+# Archivos locales de configuración
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
