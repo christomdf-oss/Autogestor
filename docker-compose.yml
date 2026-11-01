@@ -23,12 +23,20 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-autogestor}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-backend}
       SECRET_KEY: ${SECRET_KEY:?Configura SECRET_KEY en .env.docker}
+
+      #almacenamiento de imagenes
+
+      IMAGE_STORAGE: ${IMAGE_STORAGE:-local}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-} 
+
     volumes:
       - vehicle_uploads:/app/static/uploads/vehiculos
     depends_on:
       db:
         condition: service_healthy
-
+    
 volumes:
   postgres_data_18:
   vehicle_uploads:

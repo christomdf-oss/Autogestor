@@ -1,7 +1,13 @@
 
 from pathlib import Path
 from uuid import uuid4
+from urllib.parse import urlparse, unquote
 import io
+import os
+import logging
+
+import cloudinary
+import cloudinary.uploader
 
 from fastapi import (
     APIRouter,
@@ -18,11 +24,11 @@ from database import get_db
 from services import vehiculos as vehiculos_service
 from schemas.vehiculos import Vehiculo, VehiculoResponse
 from security import obtener_usuario_actual, verificar_admin
-
 from Repository import vehiculos as vehiculos_repository
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 UPLOAD_DIR = Path("static/uploads/vehiculos")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -37,16 +43,105 @@ FORMATOS = {
 }
 
 
-def borrar_archivo_local(url):
-    prefijo = "/static/uploads/vehiculos/"
+def usar_cloudinary():
+    return os.getenv(
+        "IMAGE_STORAGE", "local"
+    ).strip().lower() == "cloudinary"
 
-    if not url.startswith(prefijo):
+
+def configurar_cloudinary():
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+    api_key = os.getenv("CLOUDINARY_API_KEY")
+    api_secret = os.getenv("CLOUDINARY_API_SECRET")
+
+    if not all((cloud_name, api_key, api_secret)):
+        raise HTTPException(
+            status_code=500,
+            detail="Faltan credenciales de Cloudinary"
+        )
+
+    cloudinary.config(
+        cloud_name=cloud_name,
+        api_key=api_key,
+        api_secret=api_secret,
+        secure=True
+    )
+
+
+def obtener_public_id_cloudinary(url):
+    """
+    Obtiene el identificador de una imagen subida
+    por AutoGestor a Cloudinary.
+    """
+    parsed = urlparse(url)
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+
+    if (
+        parsed.scheme != "https"
+        or parsed.hostname != "res.cloudinary.com"
+        or not cloud_name
+    ):
+        return None
+
+    partes = unquote(parsed.path).split("/")
+
+    if len(partes) < 7:
+        return None
+
+    if partes[1] != cloud_name:
+        return None
+
+    if partes[2:4] != ["image", "upload"]:
+        return None
+
+    resto = partes[4:]
+
+    if (
+        resto
+        and resto[0].startswith("v")
+        and resto[0][1:].isdigit()
+    ):
+        resto = resto[1:]
+
+    if not resto or resto[0] != "autogestor":
+        return None
+
+    if len(resto) < 3 or resto[1] != "vehiculos":
+        return None
+
+    public_id = "/".join(resto).rsplit(".", 1)[0]
+
+    return public_id
+
+
+def borrar_imagen_almacenamiento(url):
+    """
+    Borra fotografías locales antiguas o imágenes
+    almacenadas en Cloudinary.
+    """
+    prefijo_local = "/static/uploads/vehiculos/"
+
+    if url.startswith(prefijo_local):
+        nombre = Path(url).name
+        archivo = UPLOAD_DIR / nombre
+        archivo.unlink(missing_ok=True)
         return
 
-    nombre = Path(url).name
-    archivo = UPLOAD_DIR / nombre
+    public_id = obtener_public_id_cloudinary(url)
 
-    archivo.unlink(missing_ok=True)
+    if public_id:
+        configurar_cloudinary()
+
+        resultado = cloudinary.uploader.destroy(
+            public_id,
+            resource_type="image",
+            invalidate=True
+        )
+
+        if resultado.get("result") not in ("ok", "not found"):
+            raise RuntimeError(
+                "Cloudinary no pudo eliminar la imagen"
+            )
 
 
 @router.get(
@@ -153,7 +248,13 @@ def eliminar_vehiculo(
     )
 
     for ruta in rutas:
-        borrar_archivo_local(ruta)
+        try:
+            borrar_imagen_almacenamiento(ruta)
+        except Exception:
+            logger.exception(
+                "No se pudo eliminar una imagen del vehículo %s",
+                id
+            )
 
     return {
         "mensaje": "Vehículo eliminado correctamente"
@@ -205,6 +306,7 @@ async def subir_imagen(
             with Image.open(io.BytesIO(contenido)) as imagen:
                 formato = imagen.format
                 imagen.verify()
+
         except (
             UnidentifiedImageError,
             OSError,
@@ -221,19 +323,49 @@ async def subir_imagen(
                 detail="Solo se permiten JPG, PNG o WebP"
             )
 
-        extension = FORMATOS[formato]
-        nombre = f"{uuid4().hex}{extension}"
-        destino = UPLOAD_DIR / nombre
+        nombre = uuid4().hex
 
-        try:
-            destino.write_bytes(contenido)
-        except OSError:
-            raise HTTPException(
-                status_code=500,
-                detail="No se pudo guardar la imagen"
+        if usar_cloudinary():
+            configurar_cloudinary()
+
+            try:
+                resultado = cloudinary.uploader.upload(
+                    contenido,
+                    folder="autogestor/vehiculos",
+                    public_id=nombre,
+                    resource_type="image",
+                    overwrite=False
+                )
+
+                url = resultado["secure_url"]
+
+            except Exception:
+                logger.exception(
+                    "Error al subir imagen a Cloudinary"
+                )
+                raise HTTPException(
+                    status_code=502,
+                    detail="No se pudo subir la imagen a Cloudinary"
+                )
+
+        else:
+            extension = FORMATOS[formato]
+            nombre_archivo = f"{nombre}{extension}"
+            destino = UPLOAD_DIR / nombre_archivo
+
+            try:
+                destino.write_bytes(contenido)
+
+            except OSError:
+                raise HTTPException(
+                    status_code=500,
+                    detail="No se pudo guardar la imagen"
+                )
+
+            url = (
+                f"/static/uploads/vehiculos/"
+                f"{nombre_archivo}"
             )
-
-        url = f"/static/uploads/vehiculos/{nombre}"
 
         try:
             imagen_db = vehiculos_repository.agregar_imagen(
@@ -242,8 +374,17 @@ async def subir_imagen(
                 url,
                 principal=(cantidad == 0)
             )
+
         except Exception:
-            destino.unlink(missing_ok=True)
+            db.rollback()
+
+            try:
+                borrar_imagen_almacenamiento(url)
+            except Exception:
+                logger.exception(
+                    "No se pudo limpiar la imagen tras error de BD"
+                )
+
             raise
 
         return {
@@ -256,7 +397,9 @@ async def subir_imagen(
         await archivo.close()
 
 
-@router.delete("/vehiculos/{id}/imagenes/{imagen_id}")
+@router.delete(
+    "/vehiculos/{id}/imagenes/{imagen_id}"
+)
 def eliminar_imagen(
     id: int,
     imagen_id: int,
@@ -277,7 +420,10 @@ def eliminar_imagen(
     era_principal = imagen.principal
     url = imagen.url
 
-    vehiculos_repository.eliminar_imagen(db, imagen)
+    vehiculos_repository.eliminar_imagen(
+        db,
+        imagen
+    )
 
     if era_principal:
         vehiculo = vehiculos_repository.obtener_vehiculo_por_id(
@@ -292,14 +438,22 @@ def eliminar_imagen(
                 vehiculo.imagenes[0].id
             )
 
-    borrar_archivo_local(url)
+    try:
+        borrar_imagen_almacenamiento(url)
+
+    except Exception:
+        logger.exception(
+            "No se pudo eliminar la imagen del almacenamiento"
+        )
 
     return {
         "mensaje": "Imagen eliminada correctamente"
     }
 
 
-@router.put("/vehiculos/{id}/imagenes/{imagen_id}/principal")
+@router.put(
+    "/vehiculos/{id}/imagenes/{imagen_id}/principal"
+)
 def cambiar_imagen_principal(
     id: int,
     imagen_id: int,
